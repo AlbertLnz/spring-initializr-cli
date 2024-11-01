@@ -1,3 +1,5 @@
+use std::io;
+
 use colored::*;
 use dialoguer::{theme::ColorfulTheme, Select};
 use reqwest;
@@ -76,9 +78,36 @@ fn main() {
             Err(e) => eprintln!("Error: {}", e),
         }
 
+        // PROJECT METADATA
+        println!("{}", "Enter the group:".bright_yellow());
+        let mut project_group = String::new();
+        io::stdin()
+            .read_line(&mut project_group)
+            .expect("Failed to read input!");
+        let project_group: &str = project_group.trim();
+
+        println!("{}", "Enter the name:".bright_yellow());
+        let mut project_name = String::new();
+        io::stdin()
+            .read_line(&mut project_name)
+            .expect("Failed to read input!");
+        let project_name: &str = project_name.trim();
+
+        println!("{}", "Enter the description:".bright_yellow());
+        let mut project_description = String::new();
+        io::stdin()
+            .read_line(&mut project_description)
+            .expect("Failed to read input!");
+        let project_description: &str = project_description.trim();
+
         println!(
-            "You selected: {} - {} - {}",
-            language, project, spring_boot_version
+            "You selected: {} - {} - {} - {} - {} - {}",
+            language,
+            project,
+            spring_boot_version,
+            project_group,
+            project_name,
+            project_description
         );
     }
 }
