@@ -10,6 +10,7 @@ use std::error::Error;
 struct SpringInitializrData {
     spring_languages: (Vec<String>, Option<usize>),
     spring_boot_versions: (Vec<String>, Option<usize>),
+    spring_packagings: (Vec<String>, Option<usize>),
     java_versions: (Vec<String>, Option<usize>),
     java_dependencies: Vec<String>,
 }
@@ -26,6 +27,15 @@ struct LanguageVersion {
 #[allow(dead_code)]
 #[derive(Deserialize, Debug)]
 struct BootVersion {
+    #[serde(rename = "type")]
+    version_type: String,
+    default: String,
+    values: Vec<VersionValue>,
+}
+
+#[allow(dead_code)]
+#[derive(Deserialize, Debug)]
+struct Packaging {
     #[serde(rename = "type")]
     version_type: String,
     default: String,
@@ -166,16 +176,24 @@ fn main() {
 
         // PACKAGING
         println!("{}", "Select the packaging:".bright_green());
-        let options = vec!["Jar", "War"];
+        let mut spring_packaging = String::new();
 
-        let selection = Select::with_theme(&ColorfulTheme::default())
-            .items(&options)
-            .default(0)
-            .interact()
-            .expect("Failed to read selection");
+        match action_() {
+            Ok(data) => {
+                let (names, default_index) = data.spring_packagings;
+                let default_position = default_index.unwrap_or(0);
 
-        let packaging = options[selection];
-        println!(" {}\n", packaging);
+                let selection = Select::with_theme(&ColorfulTheme::default())
+                    .items(&names)
+                    .default(default_position)
+                    .interact()
+                    .expect("Failed to read selection");
+
+                spring_packaging = names[selection].clone();
+                println!("Selected Java Version: {}\n", spring_packaging);
+            }
+            Err(e) => eprintln!("Error: {}", e),
+        }
 
         // JAVA VERSION
         println!("{}", "Select the Java version:".bright_green());
@@ -230,7 +248,7 @@ fn main() {
             project_name,
             project_description,
             project_version,
-            packaging,
+            spring_packaging,
             java_version,
             &selected_java_dependencies,
         );
@@ -243,12 +261,14 @@ fn action_() -> Result<SpringInitializrData, Box<dyn Error>> {
     let json = fetch_spring_initializr_api()?;
     let spring_language = get_spring_langauge(json.clone())?;
     let spring_boot_version = get_spring_boot_version(json.clone())?;
+    let spring_packaging = get_spring_packaging(json.clone())?;
     let java_version = get_java_version(json.clone())?;
     let java_dependency = get_java_dependency(json)?;
 
     Ok(SpringInitializrData {
         spring_languages: spring_language,
         spring_boot_versions: spring_boot_version,
+        spring_packagings: spring_packaging,
         java_versions: java_version,
         java_dependencies: java_dependency,
     })
@@ -280,6 +300,21 @@ fn get_spring_boot_version(
     response_json: Value,
 ) -> Result<(Vec<String>, Option<usize>), Box<dyn Error>> {
     let boot_version: BootVersion = serde_json::from_value(response_json["bootVersion"].clone())?;
+
+    let ids: Vec<String> = boot_version.values.iter().map(|v| v.id.clone()).collect();
+    let names: Vec<String> = boot_version.values.iter().map(|v| v.name.clone()).collect();
+
+    let default_index = ids
+        .iter()
+        .position(|id| id.trim() == boot_version.default.trim());
+
+    Ok((names, default_index))
+}
+
+fn get_spring_packaging(
+    response_json: Value,
+) -> Result<(Vec<String>, Option<usize>), Box<dyn Error>> {
+    let boot_version: Packaging = serde_json::from_value(response_json["packaging"].clone())?;
 
     let ids: Vec<String> = boot_version.values.iter().map(|v| v.id.clone()).collect();
     let names: Vec<String> = boot_version.values.iter().map(|v| v.name.clone()).collect();
@@ -328,7 +363,7 @@ fn generate_spring_init_command(
     project_name: &str,
     project_description: &str,
     project_version: &str,
-    packaging: &str,
+    spring_packaging: String,
     java_version: String,
     selected_java_dependencies: &[String],
 ) -> String {
@@ -346,7 +381,7 @@ fn generate_spring_init_command(
         java_version,
         spring_language.to_lowercase(),
         spring_boot_version,
-        packaging.to_lowercase(),
+        spring_packaging.to_lowercase(),
         project_name
     )
 }
