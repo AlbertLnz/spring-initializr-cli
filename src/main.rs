@@ -8,9 +8,19 @@ use serde_json::Value;
 use std::error::Error;
 
 struct SpringInitializrData {
+    spring_languages: (Vec<String>, Option<usize>),
     spring_boot_versions: (Vec<String>, Option<usize>),
     java_versions: (Vec<String>, Option<usize>),
     java_dependencies: Vec<String>,
+}
+
+#[allow(dead_code)]
+#[derive(Deserialize, Debug)]
+struct LanguageVersion {
+    #[serde(rename = "type")]
+    version_type: String,
+    default: String,
+    values: Vec<VersionValue>,
 }
 
 #[allow(dead_code)]
@@ -72,16 +82,24 @@ fn main() {
     loop {
         // LANGUAGE:
         println!("{}", "Select the language:".bright_green());
-        let options = vec!["Java", "Kotlin", "Groovy"];
+        let mut spring_language = String::new();
 
-        let selection = Select::with_theme(&ColorfulTheme::default())
-            .items(&options)
-            .default(0)
-            .interact()
-            .expect("Failed to read selection");
+        match action_() {
+            Ok(data) => {
+                let (names, default_index) = data.spring_languages;
+                let default_position = default_index.unwrap_or(0);
 
-        let language = options[selection];
-        println!(" {}\n", language);
+                let selection = Select::with_theme(&ColorfulTheme::default())
+                    .items(&names)
+                    .default(default_position)
+                    .interact()
+                    .expect("Failed to read selection");
+
+                spring_language = names[selection].clone();
+                println!("Selected Java Version: {}\n", spring_language);
+            }
+            Err(e) => eprintln!("Error: {}", e),
+        }
 
         // PROJECT
         println!("{}", "Select the project:".bright_green());
@@ -205,7 +223,7 @@ fn main() {
         }
 
         let command = generate_spring_init_command(
-            language,
+            spring_language,
             project,
             spring_boot_version,
             project_group,
@@ -223,11 +241,13 @@ fn main() {
 
 fn action_() -> Result<SpringInitializrData, Box<dyn Error>> {
     let json = fetch_spring_initializr_api()?;
+    let spring_language = get_spring_langauge(json.clone())?;
     let spring_boot_version = get_spring_boot_version(json.clone())?;
     let java_version = get_java_version(json.clone())?;
     let java_dependency = get_java_dependency(json)?;
 
     Ok(SpringInitializrData {
+        spring_languages: spring_language,
         spring_boot_versions: spring_boot_version,
         java_versions: java_version,
         java_dependencies: java_dependency,
@@ -239,6 +259,21 @@ fn fetch_spring_initializr_api() -> Result<Value, Box<dyn Error>> {
     let response = reqwest::blocking::get(url)?;
     let response_json: Value = response.json()?;
     Ok(response_json)
+}
+
+fn get_spring_langauge(
+    response_json: Value,
+) -> Result<(Vec<String>, Option<usize>), Box<dyn Error>> {
+    let boot_version: LanguageVersion = serde_json::from_value(response_json["language"].clone())?;
+
+    let ids: Vec<String> = boot_version.values.iter().map(|v| v.id.clone()).collect();
+    let names: Vec<String> = boot_version.values.iter().map(|v| v.name.clone()).collect();
+
+    let default_index = ids
+        .iter()
+        .position(|id| id.trim() == boot_version.default.trim());
+
+    Ok((names, default_index))
 }
 
 fn get_spring_boot_version(
@@ -286,7 +321,7 @@ fn get_java_dependency(response_json: Value) -> Result<Vec<String>, Box<dyn Erro
 }
 
 fn generate_spring_init_command(
-    language: &str,
+    spring_language: String,
     project: &str,
     spring_boot_version: String,
     project_group: &str,
@@ -309,7 +344,7 @@ fn generate_spring_init_command(
         project.to_lowercase(),
         project.to_lowercase(),
         java_version,
-        language.to_lowercase(),
+        spring_language.to_lowercase(),
         spring_boot_version,
         packaging.to_lowercase(),
         project_name
