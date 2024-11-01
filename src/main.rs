@@ -17,38 +17,18 @@ struct SpringInitializrData {
 
 #[allow(dead_code)]
 #[derive(Deserialize, Debug)]
-struct LanguageVersion {
+struct VersionInfo<T> {
     #[serde(rename = "type")]
     version_type: String,
     default: String,
-    values: Vec<VersionValue>,
+    values: Vec<T>,
 }
 
 #[allow(dead_code)]
 #[derive(Deserialize, Debug)]
-struct BootVersion {
-    #[serde(rename = "type")]
-    version_type: String,
-    default: String,
-    values: Vec<VersionValue>,
-}
-
-#[allow(dead_code)]
-#[derive(Deserialize, Debug)]
-struct Packaging {
-    #[serde(rename = "type")]
-    version_type: String,
-    default: String,
-    values: Vec<VersionValue>,
-}
-
-#[allow(dead_code)]
-#[derive(Deserialize, Debug)]
-struct JavaVersion {
-    #[serde(rename = "type")]
-    version_type: String,
-    default: String,
-    values: Vec<VersionValue>,
+struct VersionValue {
+    id: String,
+    name: String,
 }
 
 #[allow(dead_code)]
@@ -57,13 +37,6 @@ struct JavaDependency {
     #[serde(rename = "type")]
     version_type: String,
     values: Vec<DependenciesValue>,
-}
-
-#[allow(dead_code)]
-#[derive(Deserialize, Debug)]
-struct VersionValue {
-    id: String,
-    name: String,
 }
 
 #[allow(dead_code)]
@@ -259,7 +232,7 @@ fn main() {
 
 fn action_() -> Result<SpringInitializrData, Box<dyn Error>> {
     let json = fetch_spring_initializr_api()?;
-    let spring_language = get_spring_langauge(json.clone())?;
+    let spring_language = get_spring_language(json.clone())?;
     let spring_boot_version = get_spring_boot_version(json.clone())?;
     let spring_packaging = get_spring_packaging(json.clone())?;
     let java_version = get_java_version(json.clone())?;
@@ -281,62 +254,43 @@ fn fetch_spring_initializr_api() -> Result<Value, Box<dyn Error>> {
     Ok(response_json)
 }
 
-fn get_spring_langauge(
+fn get_versions(
     response_json: Value,
+    key: &str,
 ) -> Result<(Vec<String>, Option<usize>), Box<dyn Error>> {
-    let boot_version: LanguageVersion = serde_json::from_value(response_json["language"].clone())?;
+    let version_info: VersionInfo<VersionValue> =
+        serde_json::from_value(response_json[key].clone())?;
 
-    let ids: Vec<String> = boot_version.values.iter().map(|v| v.id.clone()).collect();
-    let names: Vec<String> = boot_version.values.iter().map(|v| v.name.clone()).collect();
+    let ids: Vec<String> = version_info.values.iter().map(|v| v.id.clone()).collect();
+    let names: Vec<String> = version_info.values.iter().map(|v| v.name.clone()).collect();
 
     let default_index = ids
         .iter()
-        .position(|id| id.trim() == boot_version.default.trim());
+        .position(|id| id.trim() == version_info.default.trim());
 
     Ok((names, default_index))
+}
+
+fn get_spring_language(
+    response_json: Value,
+) -> Result<(Vec<String>, Option<usize>), Box<dyn Error>> {
+    get_versions(response_json, "language") // Elimina la parte generica
 }
 
 fn get_spring_boot_version(
     response_json: Value,
 ) -> Result<(Vec<String>, Option<usize>), Box<dyn Error>> {
-    let boot_version: BootVersion = serde_json::from_value(response_json["bootVersion"].clone())?;
-
-    let ids: Vec<String> = boot_version.values.iter().map(|v| v.id.clone()).collect();
-    let names: Vec<String> = boot_version.values.iter().map(|v| v.name.clone()).collect();
-
-    let default_index = ids
-        .iter()
-        .position(|id| id.trim() == boot_version.default.trim());
-
-    Ok((names, default_index))
+    get_versions(response_json, "bootVersion")
 }
 
 fn get_spring_packaging(
     response_json: Value,
 ) -> Result<(Vec<String>, Option<usize>), Box<dyn Error>> {
-    let boot_version: Packaging = serde_json::from_value(response_json["packaging"].clone())?;
-
-    let ids: Vec<String> = boot_version.values.iter().map(|v| v.id.clone()).collect();
-    let names: Vec<String> = boot_version.values.iter().map(|v| v.name.clone()).collect();
-
-    let default_index = ids
-        .iter()
-        .position(|id| id.trim() == boot_version.default.trim());
-
-    Ok((names, default_index))
+    get_versions(response_json, "packaging")
 }
 
 fn get_java_version(response_json: Value) -> Result<(Vec<String>, Option<usize>), Box<dyn Error>> {
-    let boot_version: JavaVersion = serde_json::from_value(response_json["javaVersion"].clone())?;
-
-    let ids: Vec<String> = boot_version.values.iter().map(|v| v.id.clone()).collect();
-    let names: Vec<String> = boot_version.values.iter().map(|v| v.name.clone()).collect();
-
-    let default_index = ids
-        .iter()
-        .position(|id| id.trim() == boot_version.default.trim());
-
-    Ok((names, default_index))
+    get_versions(response_json, "javaVersion")
 }
 
 fn get_java_dependency(response_json: Value) -> Result<Vec<String>, Box<dyn Error>> {
