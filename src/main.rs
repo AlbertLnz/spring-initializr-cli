@@ -204,8 +204,7 @@ fn main() {
             Err(e) => eprintln!("Error: {}", e),
         }
 
-        println!(
-            "You selected: {} - {} - {} - {} - {} - {} - {} - {} - {} - {:?}",
+        let command = generate_spring_init_command(
             language,
             project,
             spring_boot_version,
@@ -215,8 +214,10 @@ fn main() {
             project_version,
             packaging,
             java_version,
-            selected_java_dependencies
+            &selected_java_dependencies,
         );
+
+        println!("{}", command);
     }
 }
 
@@ -282,4 +283,35 @@ fn get_java_dependency(response_json: Value) -> Result<Vec<String>, Box<dyn Erro
     }
 
     Ok(ids)
+}
+
+fn generate_spring_init_command(
+    language: &str,
+    project: &str,
+    spring_boot_version: String,
+    project_group: &str,
+    project_name: &str,
+    project_description: &str,
+    project_version: &str,
+    packaging: &str,
+    java_version: String,
+    selected_java_dependencies: &[String],
+) -> String {
+    format!(
+        "spring init \\\n  --name={} \\\n  --groupId={} \\\n  --artifactId={} \\\n  --version={} \\\n  --description=\"{}\" \\\n  --package-name={} \\\n  --dependencies={} \\\n  --build={} \\\n  --type={}-project \\\n  --java-version={} \\\n  --language={} \\\n  --boot-version={} \\\n  --packaging={} \\\n  {}",
+        project_name,
+        project_group,
+        project_name,
+        project_version,
+        project_description,
+        project_group.replace('.', ".").to_lowercase() + "." + project_name,
+        selected_java_dependencies.join(","),
+        project.to_lowercase(),
+        project.to_lowercase(),
+        java_version,
+        language.to_lowercase(),
+        spring_boot_version,
+        packaging.to_lowercase(),
+        project_name
+    )
 }
