@@ -100,14 +100,28 @@ fn main() {
             .expect("Failed to read input!");
         let project_description: &str = project_description.trim();
 
+        // PACKAGING
+        println!("{}", "Select the packaging:".bright_green());
+        let options = vec!["Jar", "War"];
+
+        let selection = Select::with_theme(&ColorfulTheme::default())
+            .items(&options)
+            .default(0)
+            .interact()
+            .expect("Failed to read selection");
+
+        let packaging = options[selection];
+        println!(" {}\n", packaging);
+
         println!(
-            "You selected: {} - {} - {} - {} - {} - {}",
+            "You selected: {} - {} - {} - {} - {} - {} - {}",
             language,
             project,
             spring_boot_version,
             project_group,
             project_name,
-            project_description
+            project_description,
+            packaging
         );
     }
 }
