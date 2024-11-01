@@ -18,6 +18,15 @@ struct BootVersion {
 
 #[allow(dead_code)]
 #[derive(Deserialize, Debug)]
+struct JavaVersion {
+    #[serde(rename = "type")]
+    version_type: String,
+    default: String,
+    values: Vec<VersionValue>,
+}
+
+#[allow(dead_code)]
+#[derive(Deserialize, Debug)]
 struct VersionValue {
     id: String,
     name: String,
@@ -63,7 +72,7 @@ fn main() {
         let mut spring_boot_version = String::new();
 
         match action_() {
-            Ok((names, default_index)) => {
+            Ok(((names, default_index), _)) => {
                 let default_position = default_index.unwrap_or(0);
 
                 let selection = Select::with_theme(&ColorfulTheme::default())
@@ -113,24 +122,48 @@ fn main() {
         let packaging = options[selection];
         println!(" {}\n", packaging);
 
+        // JAVA VERSION
+        println!("{}", "Select the Java version:".bright_green());
+        let mut java_version = String::new();
+
+        match action_() {
+            Ok((_, (names, default_index))) => {
+                let default_position = default_index.unwrap_or(0);
+
+                let selection = Select::with_theme(&ColorfulTheme::default())
+                    .items(&names)
+                    .default(default_position)
+                    .interact()
+                    .expect("Failed to read selection");
+
+                java_version = names[selection].clone();
+                println!("Selected Java Version: {}\n", java_version);
+            }
+            Err(e) => eprintln!("Error: {}", e),
+        }
+
         println!(
-            "You selected: {} - {} - {} - {} - {} - {} - {}",
+            "You selected: {} - {} - {} - {} - {} - {} - {} - {}",
             language,
             project,
             spring_boot_version,
             project_group,
             project_name,
             project_description,
-            packaging
+            packaging,
+            java_version
         );
     }
 }
 
-fn action_() -> Result<(Vec<String>, Option<usize>), Box<dyn Error>> {
+fn action_() -> Result<((Vec<String>, Option<usize>), (Vec<String>, Option<usize>)), Box<dyn Error>>
+{
     let json = fetch_spring_initializr_api()?;
-    let spring_boot_version = get_spring_boot_version(json)?;
+    let spring_boot_version = get_spring_boot_version(json.clone())?;
+    let java_version = get_java_version(json)?;
+    // ...
 
-    Ok(spring_boot_version)
+    Ok((spring_boot_version, java_version))
 }
 
 fn fetch_spring_initializr_api() -> Result<Value, Box<dyn Error>> {
@@ -144,6 +177,19 @@ fn get_spring_boot_version(
     response_json: Value,
 ) -> Result<(Vec<String>, Option<usize>), Box<dyn Error>> {
     let boot_version: BootVersion = serde_json::from_value(response_json["bootVersion"].clone())?;
+
+    let ids: Vec<String> = boot_version.values.iter().map(|v| v.id.clone()).collect();
+    let names: Vec<String> = boot_version.values.iter().map(|v| v.name.clone()).collect();
+
+    let default_index = ids
+        .iter()
+        .position(|id| id.trim() == boot_version.default.trim());
+
+    Ok((names, default_index))
+}
+
+fn get_java_version(response_json: Value) -> Result<(Vec<String>, Option<usize>), Box<dyn Error>> {
+    let boot_version: JavaVersion = serde_json::from_value(response_json["javaVersion"].clone())?;
 
     let ids: Vec<String> = boot_version.values.iter().map(|v| v.id.clone()).collect();
     let names: Vec<String> = boot_version.values.iter().map(|v| v.name.clone()).collect();
