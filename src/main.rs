@@ -1,7 +1,7 @@
 use std::io;
 
 use colored::*;
-use dialoguer::{theme::ColorfulTheme, Select};
+use dialoguer::{theme::ColorfulTheme, MultiSelect, Select};
 use reqwest;
 use serde::Deserialize;
 use serde_json::Value;
@@ -10,6 +10,7 @@ use std::error::Error;
 struct SpringInitializrData {
     spring_boot_versions: (Vec<String>, Option<usize>),
     java_versions: (Vec<String>, Option<usize>),
+    java_dependencies: Vec<String>,
 }
 
 #[allow(dead_code)]
@@ -32,9 +33,32 @@ struct JavaVersion {
 
 #[allow(dead_code)]
 #[derive(Deserialize, Debug)]
+struct JavaDependency {
+    #[serde(rename = "type")]
+    version_type: String,
+    values: Vec<DependenciesValue>,
+}
+
+#[allow(dead_code)]
+#[derive(Deserialize, Debug)]
 struct VersionValue {
     id: String,
     name: String,
+}
+
+#[allow(dead_code)]
+#[derive(Deserialize, Debug)]
+struct DependenciesValue {
+    name: String,
+    values: Option<Vec<DependencyValue>>,
+}
+
+#[allow(dead_code)]
+#[derive(Deserialize, Debug)]
+struct DependencyValue {
+    id: String,
+    name: String,
+    description: Option<String>,
 }
 
 fn main() {
@@ -149,8 +173,32 @@ fn main() {
             Err(e) => eprintln!("Error: {}", e),
         }
 
+        // DEPENDENCIES
+        println!("{}", "Select the dependencies:".bright_green());
+        let mut selected_java_dependencies = vec![];
+        match action_() {
+            Ok(data) => {
+                let java_dependency_names = data.java_dependencies;
+
+                let java_dependency_selection = MultiSelect::with_theme(&ColorfulTheme::default())
+                    .items(&java_dependency_names)
+                    .interact()
+                    .expect("Failed to read selection");
+
+                for &index in &java_dependency_selection {
+                    selected_java_dependencies.push(java_dependency_names[index].clone());
+                }
+
+                println!(
+                    "Selected Java Dependencies: {:?}\n",
+                    selected_java_dependencies
+                );
+            }
+            Err(e) => eprintln!("Error: {}", e),
+        }
+
         println!(
-            "You selected: {} - {} - {} - {} - {} - {} - {} - {}",
+            "You selected: {} - {} - {} - {} - {} - {} - {} - {} - {:?}",
             language,
             project,
             spring_boot_version,
@@ -158,7 +206,8 @@ fn main() {
             project_name,
             project_description,
             packaging,
-            java_version
+            java_version,
+            selected_java_dependencies
         );
     }
 }
@@ -166,11 +215,13 @@ fn main() {
 fn action_() -> Result<SpringInitializrData, Box<dyn Error>> {
     let json = fetch_spring_initializr_api()?;
     let spring_boot_version = get_spring_boot_version(json.clone())?;
-    let java_version = get_java_version(json)?;
+    let java_version = get_java_version(json.clone())?;
+    let java_dependency = get_java_dependency(json)?;
 
     Ok(SpringInitializrData {
         spring_boot_versions: spring_boot_version,
         java_versions: java_version,
+        java_dependencies: java_dependency,
     })
 }
 
@@ -207,4 +258,20 @@ fn get_java_version(response_json: Value) -> Result<(Vec<String>, Option<usize>)
         .position(|id| id.trim() == boot_version.default.trim());
 
     Ok((names, default_index))
+}
+
+fn get_java_dependency(response_json: Value) -> Result<Vec<String>, Box<dyn Error>> {
+    let java_depen: JavaDependency = serde_json::from_value(response_json["dependencies"].clone())?;
+
+    let mut ids = Vec::new();
+
+    for value in java_depen.values {
+        if let Some(nested_values) = value.values {
+            for nested in nested_values {
+                ids.push(nested.id);
+            }
+        }
+    }
+
+    Ok(ids)
 }
