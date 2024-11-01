@@ -14,6 +14,7 @@ struct BootVersion {
     values: Vec<VersionValue>,
 }
 
+#[allow(dead_code)]
 #[derive(Deserialize, Debug)]
 struct VersionValue {
     id: String,
@@ -59,7 +60,7 @@ fn main() {
         println!("{}", "Select the Spring Boot version:".bright_green());
         let mut spring_boot_version = String::new();
 
-        match get_spring_boot_version() {
+        match action_() {
             Ok((names, default_index)) => {
                 let default_position = default_index.unwrap_or(0);
 
@@ -82,11 +83,23 @@ fn main() {
     }
 }
 
-fn get_spring_boot_version() -> Result<(Vec<String>, Option<usize>), Box<dyn Error>> {
+fn action_() -> Result<(Vec<String>, Option<usize>), Box<dyn Error>> {
+    let json = fetch_spring_initializr_api()?;
+    let spring_boot_version = get_spring_boot_version(json)?;
+
+    Ok(spring_boot_version)
+}
+
+fn fetch_spring_initializr_api() -> Result<Value, Box<dyn Error>> {
     let url = "https://start.spring.io/metadata/client";
     let response = reqwest::blocking::get(url)?;
     let response_json: Value = response.json()?;
+    Ok(response_json)
+}
 
+fn get_spring_boot_version(
+    response_json: Value,
+) -> Result<(Vec<String>, Option<usize>), Box<dyn Error>> {
     let boot_version: BootVersion = serde_json::from_value(response_json["bootVersion"].clone())?;
 
     let ids: Vec<String> = boot_version.values.iter().map(|v| v.id.clone()).collect();
