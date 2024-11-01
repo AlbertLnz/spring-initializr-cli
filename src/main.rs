@@ -139,6 +139,13 @@ fn main() {
             .expect("Failed to read input!");
         let project_description: &str = project_description.trim();
 
+        println!("{}", "Enter the version:".bright_yellow());
+        let mut project_version = String::new();
+        io::stdin()
+            .read_line(&mut project_version)
+            .expect("Failed to read input!");
+        let project_version: &str = project_version.trim();
+
         // PACKAGING
         println!("{}", "Select the packaging:".bright_green());
         let options = vec!["Jar", "War"];
@@ -198,13 +205,14 @@ fn main() {
         }
 
         println!(
-            "You selected: {} - {} - {} - {} - {} - {} - {} - {} - {:?}",
+            "You selected: {} - {} - {} - {} - {} - {} - {} - {} - {} - {:?}",
             language,
             project,
             spring_boot_version,
             project_group,
             project_name,
             project_description,
+            project_version,
             packaging,
             java_version,
             selected_java_dependencies
