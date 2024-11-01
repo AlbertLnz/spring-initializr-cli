@@ -62,172 +62,170 @@ fn main() {
     );
     println!("{}", "Created by AlbertLnz".bright_cyan());
 
-    loop {
-        // LANGUAGE:
-        println!("{}", "Select the language:".bright_green());
-        let mut spring_language = String::new();
+    // LANGUAGE:
+    println!("{}", "Select the language:".bright_green());
+    let mut spring_language = String::new();
 
-        match action_() {
-            Ok(data) => {
-                let (names, default_index) = data.spring_languages;
-                let default_position = default_index.unwrap_or(0);
+    match action_() {
+        Ok(data) => {
+            let (names, default_index) = data.spring_languages;
+            let default_position = default_index.unwrap_or(0);
 
-                let selection = Select::with_theme(&ColorfulTheme::default())
-                    .items(&names)
-                    .default(default_position)
-                    .interact()
-                    .expect("Failed to read selection");
+            let selection = Select::with_theme(&ColorfulTheme::default())
+                .items(&names)
+                .default(default_position)
+                .interact()
+                .expect("Failed to read selection");
 
-                spring_language = names[selection].clone();
-                println!("Selected Java Version: {}\n", spring_language);
-            }
-            Err(e) => eprintln!("Error: {}", e),
+            spring_language = names[selection].clone();
+            println!("Selected Java Version: {}\n", spring_language);
         }
-
-        // PROJECT
-        println!("{}", "Select the project:".bright_green());
-        let options = vec!["Gradle", "Maven"];
-
-        let selection = Select::with_theme(&ColorfulTheme::default())
-            .items(&options)
-            .default(1)
-            .interact()
-            .expect("Failed to read selection");
-
-        let project = options[selection];
-        println!(" {}\n", project);
-
-        // SPRING BOOTVERSION
-        println!("{}", "Select the Spring Boot version:".bright_green());
-        let mut spring_boot_version = String::new();
-
-        match action_() {
-            Ok(data) => {
-                let (names, default_index) = data.spring_boot_versions;
-                let default_position = default_index.unwrap_or(0);
-
-                let selection = Select::with_theme(&ColorfulTheme::default())
-                    .items(&names)
-                    .default(default_position)
-                    .interact()
-                    .expect("Failed to read selection");
-
-                spring_boot_version = names[selection].clone();
-                println!("Selected Spring Boot Version: {}\n", spring_boot_version);
-            }
-            Err(e) => eprintln!("Error: {}", e),
-        }
-
-        // PROJECT METADATA
-        println!("{}", "Enter the group:".bright_yellow());
-        let mut project_group = String::new();
-        io::stdin()
-            .read_line(&mut project_group)
-            .expect("Failed to read input!");
-        let project_group: &str = project_group.trim();
-
-        println!("{}", "Enter the name:".bright_yellow());
-        let mut project_name = String::new();
-        io::stdin()
-            .read_line(&mut project_name)
-            .expect("Failed to read input!");
-        let project_name: &str = project_name.trim();
-
-        println!("{}", "Enter the description:".bright_yellow());
-        let mut project_description = String::new();
-        io::stdin()
-            .read_line(&mut project_description)
-            .expect("Failed to read input!");
-        let project_description: &str = project_description.trim();
-
-        println!("{}", "Enter the version:".bright_yellow());
-        let mut project_version = String::new();
-        io::stdin()
-            .read_line(&mut project_version)
-            .expect("Failed to read input!");
-        let project_version: &str = project_version.trim();
-
-        // PACKAGING
-        println!("{}", "Select the packaging:".bright_green());
-        let mut spring_packaging = String::new();
-
-        match action_() {
-            Ok(data) => {
-                let (names, default_index) = data.spring_packagings;
-                let default_position = default_index.unwrap_or(0);
-
-                let selection = Select::with_theme(&ColorfulTheme::default())
-                    .items(&names)
-                    .default(default_position)
-                    .interact()
-                    .expect("Failed to read selection");
-
-                spring_packaging = names[selection].clone();
-                println!("Selected Java Version: {}\n", spring_packaging);
-            }
-            Err(e) => eprintln!("Error: {}", e),
-        }
-
-        // JAVA VERSION
-        println!("{}", "Select the Java version:".bright_green());
-        let mut java_version = String::new();
-
-        match action_() {
-            Ok(data) => {
-                let (names, default_index) = data.java_versions;
-                let default_position = default_index.unwrap_or(0);
-
-                let selection = Select::with_theme(&ColorfulTheme::default())
-                    .items(&names)
-                    .default(default_position)
-                    .interact()
-                    .expect("Failed to read selection");
-
-                java_version = names[selection].clone();
-                println!("Selected Java Version: {}\n", java_version);
-            }
-            Err(e) => eprintln!("Error: {}", e),
-        }
-
-        // DEPENDENCIES
-        println!("{}", "Select the dependencies:".bright_green());
-        let mut selected_java_dependencies = vec![];
-        match action_() {
-            Ok(data) => {
-                let java_dependency_names = data.java_dependencies;
-
-                let java_dependency_selection = MultiSelect::with_theme(&ColorfulTheme::default())
-                    .items(&java_dependency_names)
-                    .interact()
-                    .expect("Failed to read selection");
-
-                for &index in &java_dependency_selection {
-                    selected_java_dependencies.push(java_dependency_names[index].clone());
-                }
-
-                println!(
-                    "Selected Java Dependencies: {:?}\n",
-                    selected_java_dependencies
-                );
-            }
-            Err(e) => eprintln!("Error: {}", e),
-        }
-
-        let command = generate_spring_init_command(
-            spring_language,
-            project,
-            spring_boot_version,
-            project_group,
-            project_name,
-            project_description,
-            project_version,
-            spring_packaging,
-            java_version,
-            &selected_java_dependencies,
-        );
-
-        println!("{}", command);
+        Err(e) => eprintln!("Error: {}", e),
     }
+
+    // PROJECT
+    println!("{}", "Select the project:".bright_green());
+    let options = vec!["Gradle", "Maven"];
+
+    let selection = Select::with_theme(&ColorfulTheme::default())
+        .items(&options)
+        .default(1)
+        .interact()
+        .expect("Failed to read selection");
+
+    let project = options[selection];
+    println!(" {}\n", project);
+
+    // SPRING BOOTVERSION
+    println!("{}", "Select the Spring Boot version:".bright_green());
+    let mut spring_boot_version = String::new();
+
+    match action_() {
+        Ok(data) => {
+            let (names, default_index) = data.spring_boot_versions;
+            let default_position = default_index.unwrap_or(0);
+
+            let selection = Select::with_theme(&ColorfulTheme::default())
+                .items(&names)
+                .default(default_position)
+                .interact()
+                .expect("Failed to read selection");
+
+            spring_boot_version = names[selection].clone();
+            println!("Selected Spring Boot Version: {}\n", spring_boot_version);
+        }
+        Err(e) => eprintln!("Error: {}", e),
+    }
+
+    // PROJECT METADATA
+    println!("{}", "Enter the group:".bright_yellow());
+    let mut project_group = String::new();
+    io::stdin()
+        .read_line(&mut project_group)
+        .expect("Failed to read input!");
+    let project_group: &str = project_group.trim();
+
+    println!("{}", "Enter the name:".bright_yellow());
+    let mut project_name = String::new();
+    io::stdin()
+        .read_line(&mut project_name)
+        .expect("Failed to read input!");
+    let project_name: &str = project_name.trim();
+
+    println!("{}", "Enter the description:".bright_yellow());
+    let mut project_description = String::new();
+    io::stdin()
+        .read_line(&mut project_description)
+        .expect("Failed to read input!");
+    let project_description: &str = project_description.trim();
+
+    println!("{}", "Enter the version:".bright_yellow());
+    let mut project_version = String::new();
+    io::stdin()
+        .read_line(&mut project_version)
+        .expect("Failed to read input!");
+    let project_version: &str = project_version.trim();
+
+    // PACKAGING
+    println!("{}", "Select the packaging:".bright_green());
+    let mut spring_packaging = String::new();
+
+    match action_() {
+        Ok(data) => {
+            let (names, default_index) = data.spring_packagings;
+            let default_position = default_index.unwrap_or(0);
+
+            let selection = Select::with_theme(&ColorfulTheme::default())
+                .items(&names)
+                .default(default_position)
+                .interact()
+                .expect("Failed to read selection");
+
+            spring_packaging = names[selection].clone();
+            println!("Selected Java Version: {}\n", spring_packaging);
+        }
+        Err(e) => eprintln!("Error: {}", e),
+    }
+
+    // JAVA VERSION
+    println!("{}", "Select the Java version:".bright_green());
+    let mut java_version = String::new();
+
+    match action_() {
+        Ok(data) => {
+            let (names, default_index) = data.java_versions;
+            let default_position = default_index.unwrap_or(0);
+
+            let selection = Select::with_theme(&ColorfulTheme::default())
+                .items(&names)
+                .default(default_position)
+                .interact()
+                .expect("Failed to read selection");
+
+            java_version = names[selection].clone();
+            println!("Selected Java Version: {}\n", java_version);
+        }
+        Err(e) => eprintln!("Error: {}", e),
+    }
+
+    // DEPENDENCIES
+    println!("{}", "Select the dependencies:".bright_green());
+    let mut selected_java_dependencies = vec![];
+    match action_() {
+        Ok(data) => {
+            let java_dependency_names = data.java_dependencies;
+
+            let java_dependency_selection = MultiSelect::with_theme(&ColorfulTheme::default())
+                .items(&java_dependency_names)
+                .interact()
+                .expect("Failed to read selection");
+
+            for &index in &java_dependency_selection {
+                selected_java_dependencies.push(java_dependency_names[index].clone());
+            }
+
+            println!(
+                "Selected Java Dependencies: {:?}\n",
+                selected_java_dependencies
+            );
+        }
+        Err(e) => eprintln!("Error: {}", e),
+    }
+
+    let command = generate_spring_init_command(
+        spring_language,
+        project,
+        spring_boot_version,
+        project_group,
+        project_name,
+        project_description,
+        project_version,
+        spring_packaging,
+        java_version,
+        &selected_java_dependencies,
+    );
+
+    println!("{}", command);
 }
 
 fn action_() -> Result<SpringInitializrData, Box<dyn Error>> {
