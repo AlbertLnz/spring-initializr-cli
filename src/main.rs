@@ -7,6 +7,11 @@ use serde::Deserialize;
 use serde_json::Value;
 use std::error::Error;
 
+struct SpringInitializrData {
+    spring_boot_versions: (Vec<String>, Option<usize>),
+    java_versions: (Vec<String>, Option<usize>),
+}
+
 #[allow(dead_code)]
 #[derive(Deserialize, Debug)]
 struct BootVersion {
@@ -72,7 +77,8 @@ fn main() {
         let mut spring_boot_version = String::new();
 
         match action_() {
-            Ok(((names, default_index), _)) => {
+            Ok(data) => {
+                let (names, default_index) = data.spring_boot_versions;
                 let default_position = default_index.unwrap_or(0);
 
                 let selection = Select::with_theme(&ColorfulTheme::default())
@@ -127,7 +133,8 @@ fn main() {
         let mut java_version = String::new();
 
         match action_() {
-            Ok((_, (names, default_index))) => {
+            Ok(data) => {
+                let (names, default_index) = data.java_versions;
                 let default_position = default_index.unwrap_or(0);
 
                 let selection = Select::with_theme(&ColorfulTheme::default())
@@ -156,14 +163,15 @@ fn main() {
     }
 }
 
-fn action_() -> Result<((Vec<String>, Option<usize>), (Vec<String>, Option<usize>)), Box<dyn Error>>
-{
+fn action_() -> Result<SpringInitializrData, Box<dyn Error>> {
     let json = fetch_spring_initializr_api()?;
     let spring_boot_version = get_spring_boot_version(json.clone())?;
     let java_version = get_java_version(json)?;
-    // ...
 
-    Ok((spring_boot_version, java_version))
+    Ok(SpringInitializrData {
+        spring_boot_versions: spring_boot_version,
+        java_versions: java_version,
+    })
 }
 
 fn fetch_spring_initializr_api() -> Result<Value, Box<dyn Error>> {
