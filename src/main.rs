@@ -71,19 +71,19 @@ fn main() {
         }
     };
 
-    // LANGUAGE:
-    println!("{}", "Select the language:".bright_green());
+    // LANGUAGE
     let (languages, default_language_index) = data.spring_languages;
     let default_language_position = default_language_index.unwrap_or(0);
 
     let language_selection = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("Select the language")
         .items(&languages)
         .default(default_language_position)
         .interact()
         .expect("Failed to read selection");
 
     let spring_language = languages[language_selection].clone();
-    println!("Selected Language: {}\n", spring_language);
+    print!("{}\n", spring_language);
 
     // PROJECT
     println!("{}", "Select the project:".bright_green());
@@ -96,7 +96,7 @@ fn main() {
         .expect("Failed to read selection");
 
     let project = options[selection];
-    println!(" {}\n", project);
+    println!("{}", project);
 
     // SPRING BOOTVERSION
     println!("{}", "Select the Spring Boot version:".bright_green());
@@ -110,7 +110,7 @@ fn main() {
         .expect("Failed to read selection");
 
     let spring_boot_version = boot_versions[boot_selection].clone();
-    println!("Selected Spring Boot Version: {}\n", spring_boot_version);
+    println!("{}", spring_boot_version);
 
     // PROJECT METADATA
     println!("{}", "Enter the group:".bright_yellow());
@@ -167,11 +167,11 @@ fn main() {
         .expect("Failed to read selection");
 
     let java_version = java_version[packaging_selection].clone();
-    println!("Selected Packaging: {}\n", java_version);
+    println!("Selected Java version: {}\n", java_version);
 
     // DEPENDENCIES
     println!("{}", "Select the dependencies:".bright_green());
-    let mut selected_java_dependencies = vec![];
+    let mut selected_dependencies = vec![];
 
     let java_dependency_names = data.java_dependencies;
 
@@ -181,13 +181,10 @@ fn main() {
         .expect("Failed to read selection");
 
     for &index in &java_dependency_selection {
-        selected_java_dependencies.push(java_dependency_names[index].clone());
+        selected_dependencies.push(java_dependency_names[index].clone());
     }
 
-    println!(
-        "Selected Java Dependencies: {:?}\n",
-        selected_java_dependencies
-    );
+    println!("Selected dependencies: {:?}\n", selected_dependencies);
 
     let command = generate_spring_init_command(
         spring_language,
@@ -199,7 +196,7 @@ fn main() {
         project_version,
         spring_packaging,
         java_version,
-        &selected_java_dependencies,
+        &selected_dependencies,
     );
 
     println!("{}", command);
