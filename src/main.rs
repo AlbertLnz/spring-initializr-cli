@@ -206,8 +206,6 @@ fn main() {
         &selected_dependencies,
     );
 
-    println!("COMMAND: {}", command);
-
     if let Err(e) = execute_command(command) {
         eprintln!("Failed to execute command: {}", e);
     }

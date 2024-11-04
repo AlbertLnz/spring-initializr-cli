@@ -1,13 +1,16 @@
+<div align="center">
+
 # Spring Initializr CLI
 
 **Spring Initializr CLI** is a command-line tool built in [Rust](https://www.rust-lang.org/) that allows developers to quickly and easily create new Spring Boot projects directly from the terminal. This tool is connected to the [Spring Initializr API](https://start.spring.io/) and enables you to generate a Spring Boot project with all the initial configurations you need without having to interact with the Spring Initializr web interface.
 
 > Dependencies <br>
->> reqwest (0.12.9)
->> dialoguer (0.11.0)
->> colored (2.1.0)
->> serde (1.0.214)
+>> reqwest (0.12.9) <br>
+>> dialoguer (0.11.0) <br>
+>> colored (2.1.0) <br>
+>> serde (1.0.214) <br>
 
+</div>
 
 ## 🏁 Features
 
