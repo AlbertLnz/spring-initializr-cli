@@ -1,4 +1,5 @@
 use std::io;
+use std::process::Command;
 
 use colored::*;
 use dialoguer::{theme::ColorfulTheme, MultiSelect, Select};
@@ -199,7 +200,7 @@ fn main() {
         &selected_dependencies,
     );
 
-    println!("{}", command);
+    execute_command(command);
 }
 
 fn action_() -> Result<SpringInitializrData, Box<dyn Error>> {
@@ -294,13 +295,16 @@ fn generate_spring_init_command(
     selected_java_dependencies: &[String],
 ) -> String {
     format!(
-        "spring init \\\n  --name={} \\\n  --groupId={} \\\n  --artifactId={} \\\n  --version={} \\\n  --description=\"{}\" \\\n  --package-name={} \\\n  --dependencies={} \\\n  --build={} \\\n  --type={}-project \\\n  --java-version={} \\\n  --language={} \\\n  --boot-version={} \\\n  --packaging={} \\\n  {}",
+        "spring init --name={} --groupId={} --artifactId={} --version={} --description=\"{}\" \
+        --package-name={}.{} --dependencies={} --build={} --type={}-project --java-version={} \
+        --language={} --boot-version={} --packaging={} {}",
         project_name,
         project_group,
         project_name,
         project_version,
         project_description,
-        project_group.replace('.', ".").to_lowercase() + "." + project_name,
+        project_group.replace('.', ".").to_lowercase(),
+        project_name,
         selected_java_dependencies.join(","),
         project.to_lowercase(),
         project.to_lowercase(),
@@ -310,4 +314,23 @@ fn generate_spring_init_command(
         spring_packaging.to_lowercase(),
         project_name
     )
+}
+
+fn execute_command(command: String) {
+    let mut parts = command.split_whitespace();
+    let executable = parts.next().expect("No se encontró el ejecutable");
+    let args: Vec<&str> = parts.collect();
+
+    let output = Command::new(executable)
+        .args(&args)
+        .output()
+        .expect("Error al ejecutar el comando");
+
+    if output.status.success() {
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        println!("Creating the project:{}", stdout);
+    } else {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        eprintln!("Error:\n{}", stderr);
+    }
 }
