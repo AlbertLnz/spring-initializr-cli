@@ -1,3 +1,4 @@
+use std::io;
 use std::process::Command;
 
 use colored::*;
@@ -5,6 +6,7 @@ use dialoguer::{theme::Theme, Input, MultiSelect, Select};
 use reqwest;
 use serde::Deserialize;
 use serde_json::Value;
+// use shlex::split;
 use std::error::Error;
 
 struct SpringInitializrData {
@@ -129,28 +131,28 @@ fn main() {
     // PROJECT METADATA
     let project_group: String = Input::with_theme(&CustomTheme)
         .with_prompt("Enter the group".cyan().to_string())
-        .default("com.example".italic().to_string())
+        .default("com.example".to_string())
         .interact_text()
         .expect("Failed to read selection");
     let project_group: &str = project_group.trim();
 
     let project_name: String = Input::with_theme(&CustomTheme)
         .with_prompt("Enter the project name".cyan().to_string())
-        .default("demo".italic().to_string())
+        .default("demo".to_string())
         .interact_text()
         .expect("Failed to read selection");
     let project_name: &str = project_name.trim();
 
     let project_description: String = Input::with_theme(&CustomTheme)
         .with_prompt("Enter the project description".cyan().to_string())
-        .default("Demo project for Spring Boot".italic().to_string())
+        .default("Demo project for Spring Boot".to_string())
         .interact_text()
         .expect("Failed to read selection");
     let project_description: &str = project_description.trim();
 
     let project_version: String = Input::with_theme(&CustomTheme)
         .with_prompt("Enter the project version".cyan().to_string())
-        .default("1.0".italic().to_string())
+        .default("1.0".to_string())
         .interact_text()
         .expect("Failed to read selection");
     let project_version: &str = project_version.trim();
@@ -206,7 +208,9 @@ fn main() {
 
     println!("COMMAND: {}", command);
 
-    execute_command(command);
+    if let Err(e) = execute_command(command) {
+        eprintln!("Failed to execute command: {}", e);
+    }
 }
 
 fn action_() -> Result<SpringInitializrData, Box<dyn Error>> {
@@ -322,21 +326,16 @@ fn generate_spring_init_command(
     )
 }
 
-fn execute_command(command: String) {
-    let mut parts = command.split_whitespace();
-    let executable = parts.next().expect("No se encontró el ejecutable");
-    let args: Vec<&str> = parts.collect();
-
-    let output = Command::new(executable)
-        .args(&args)
-        .output()
-        .expect("Error al ejecutar el comando");
+fn execute_command(command: String) -> Result<(), io::Error> {
+    let output = Command::new("sh").arg("-c").arg(command).output()?;
 
     if output.status.success() {
         let stdout = String::from_utf8_lossy(&output.stdout);
-        println!("Creating the project:{}", stdout);
+        println!("Creating the project: {}", stdout);
     } else {
         let stderr = String::from_utf8_lossy(&output.stderr);
         eprintln!("Error:\n{}", stderr);
     }
+
+    Ok(())
 }
