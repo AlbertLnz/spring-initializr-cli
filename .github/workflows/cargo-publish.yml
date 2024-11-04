@@ -1,10 +1,6 @@
-name: Publish
+name: 'Publish to Crates.io'
 
-on:
-  push:
-    tags:        
-      - '*'
-  workflow_dispatch:
+on: push
 
 jobs:
   publish:
