@@ -8,6 +8,7 @@
 >> colored (2.1.0)
 >> serde (1.0.214)
 
+
 ## 🏁 Features
 
 - Fast generation of Spring Boot projects.
@@ -15,9 +16,28 @@
 - Color output to enhance user experience.
 - Interactive dialogs to facilitate option selection.
 
+
 ## ▶️ Demo
 
+
 ## 💻 Install on your PC!
+    
+  > [!IMPORTANT]
+  > Before using this CLI app, you have to install **Spring Boot CLI**. See the *'Install Spring Boot CLI'* section.
+  
+  > [!TIP]
+  > I recommend to create an alias for execute the programm. See the *'Create an alias (Linux)'*
+  
+  
+  
+  ### ‒ Install Spring Boot CLI
+  You can install **Spring Boot CLI** easily using SDKMan
+  
+  ### ‒ Create an alias (Linux)
+  
+  1. Open: ``` sudo nano ~/.bashrc ```
+  2. Add this example line: ``` alias spring-cli='~/Documents/spring-initializr-cli' ```
+
 
 ## ⬇️ Locally project installation
 
@@ -27,6 +47,7 @@ To install **Spring Initializr CLI**, make sure you have Rust installed on your 
 git clone https://github.com/albertlnz/spring-initializr-cli.git
 cd spring-initializr-cli
 cargo build --release
+```
 
 ## ☕ Buy me a coffee
 
