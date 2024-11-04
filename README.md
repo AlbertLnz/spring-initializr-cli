@@ -9,6 +9,7 @@
 >> dialoguer (0.11.0) <br>
 >> colored (2.1.0) <br>
 >> serde (1.0.214) <br>
+>> termion (4.0.3) <br>
 
 </div>
 

@@ -6,8 +6,8 @@ use dialoguer::{theme::Theme, Input, MultiSelect, Select};
 use reqwest;
 use serde::Deserialize;
 use serde_json::Value;
-// use shlex::split;
 use std::error::Error;
+extern crate termion;
 
 struct SpringInitializrData {
     spring_languages: (Vec<String>, Option<usize>),
@@ -79,12 +79,19 @@ impl Theme for CustomTheme {
 
 fn main() {
     // header
-    println!("{}", "Spring Initializr CLI!".bright_green().bold());
-    println!(
-        "{}",
-        "https://github.com/AlbertLnz/spring-initializr-cli".bright_yellow()
-    );
-    println!("{}", "Created by AlbertLnz\n".bright_magenta().italic());
+    let width = match termion::terminal_size() {
+        Ok((w, _)) => w as usize,
+        Err(_) => 80,
+    };
+
+    let header = center_text("Spring Initializr CLI!", width);
+    println!("{}", header.bright_green().bold());
+
+    let link = center_text("https://github.com/AlbertLnz/spring-initializr-cli", width);
+    println!("{}", link.bright_yellow().dimmed());
+
+    let creator = center_text("Created by AlbertLnz", width);
+    println!("{}", creator.bright_magenta().dimmed().italic());
 
     // fetching action_()
     let data = match action_() {
@@ -184,7 +191,7 @@ fn main() {
     let mut selected_dependencies = vec![];
 
     let java_dependency_selection = MultiSelect::with_theme(&CustomTheme)
-        .with_prompt("Select the dependencies:".cyan().to_string())
+        .with_prompt("Select the dependencies".cyan().to_string())
         .items(&java_dependency_names)
         .interact()
         .expect("Failed to read selection");
@@ -209,6 +216,15 @@ fn main() {
     if let Err(e) = execute_command(command) {
         eprintln!("Failed to execute command: {}", e);
     }
+}
+
+fn center_text(text: &str, width: usize) -> String {
+    let text_length = text.len();
+    if text_length >= width {
+        return text.to_string();
+    }
+    let spaces = (width - text_length) / 2;
+    format!("{}{}", " ".repeat(spaces), text)
 }
 
 fn action_() -> Result<SpringInitializrData, Box<dyn Error>> {
@@ -302,6 +318,8 @@ fn generate_spring_init_command(
     java_version: String,
     selected_java_dependencies: &[String],
 ) -> String {
+    println!("{}", "Creating the project...".cyan().bold());
+
     format!(
         "spring init --name={} --groupId={} --artifactId={} --version={} --description=\"{}\" \
         --package-name={}.{} --dependencies={} --build={} --type={}-project --java-version={} \
@@ -329,7 +347,7 @@ fn execute_command(command: String) -> Result<(), io::Error> {
 
     if output.status.success() {
         let stdout = String::from_utf8_lossy(&output.stdout);
-        println!("Creating the project: {}", stdout);
+        println!("{}", stdout);
     } else {
         let stderr = String::from_utf8_lossy(&output.stderr);
         eprintln!("Error:\n{}", stderr);
