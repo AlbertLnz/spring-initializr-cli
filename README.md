@@ -1,17 +1,17 @@
 <div align="center">
 
-# Spring Initializr CLI
+  # Spring Initializr CLI
 
-**Spring Initializr CLI** is a command-line tool built in [Rust](https://www.rust-lang.org/) that allows developers to quickly and easily create new Spring Boot projects directly from the terminal. This tool is connected to the [Spring Initializr API](https://start.spring.io/) and enables you to generate a Spring Boot project with all the initial configurations you need without having to interact with the Spring Initializr web interface.
-
-> Dependencies <br>
->> reqwest (0.12.9) <br>
->> dialoguer (0.11.0) <br>
->> colored (2.1.0) <br>
->> serde (1.0.214) <br>
->> termion (4.0.3) <br>
+  **Spring Initializr CLI** is a command-line tool built in [Rust](https://www.rust-lang.org/) that allows developers to quickly and easily create new Spring Boot projects directly from the terminal. This tool is connected to the [Spring Initializr API](https://start.spring.io/) and enables you to generate a Spring Boot project with all the initial configurations you need without having to interact with the Spring Initializr web interface.
 
 </div>
+
+> Dependencies <br>
+>> reqwest,
+>> dialoguer,
+>> colored,
+>> serde,
+>> termion
 
 ## 🏁 Features
 
@@ -24,20 +24,26 @@
 ## ▶️ Demo
 
 
-## 💻 Install on your PC!
-    
-  > [!IMPORTANT]
-  > Before using this CLI app, you have to install **Spring Boot CLI**. See the *'Install Spring Boot CLI'* section.
+## 💻 Install on your PC! (Linux)
+
+  1.   
+      > [!IMPORTANT]
+      > Before using this CLI app, you need to install **Spring Boot CLI**. See the ***'Install Spring Boot CLI'*** section.
   
-  > [!TIP]
-  > I recommend to create an alias for execute the programm. See the *'Create an alias (Linux)'*
+  2. Download the file from 'targets/linux/spring-initializr-cli': [spring-initializr-cli](https://raw.githubusercontent.com/AlbertLnz/spring-initializr-cli/master/targets/linux/spring-initializr-cli)
+
+  3. 
+        > [!TIP]
+        > I recommend to create an alias for execute the programm. See the ***'Create an alias'***
   
-  
-  
+  4. Ubicate the download file wherever you want (according to alias)
+
+  5. Run!
+
   ### ‒ Install Spring Boot CLI
   You can install **Spring Boot CLI** easily using SDKMan
   
-  ### ‒ Create an alias (Linux)
+  ### ‒ Create an alias
   
   1. Open: ``` sudo nano ~/.bashrc ```
   2. Add this example line: ``` alias spring-cli='~/Documents/spring-initializr-cli' ```
@@ -45,7 +51,7 @@
 
 ## ⬇️ Locally project installation
 
-To install **Spring Initializr CLI**, make sure you have Rust installed on your system. Then, you can clone this repository and build the project:
+To install **Spring Initializr CLI**, make sure you have Rust and Spring Boot CLI installed on your system. Then, you can clone this repository and build the project:
 
 ```bash
 git clone https://github.com/albertlnz/spring-initializr-cli.git
