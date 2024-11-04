@@ -2,7 +2,7 @@ use std::io;
 use std::process::Command;
 
 use colored::*;
-use dialoguer::{theme::ColorfulTheme, MultiSelect, Select};
+use dialoguer::{theme::Theme, MultiSelect, Select};
 use reqwest;
 use serde::Deserialize;
 use serde_json::Value;
@@ -55,13 +55,22 @@ struct DependencyValue {
     description: Option<String>,
 }
 
+struct CustomTheme;
+
+impl Theme for CustomTheme {
+    // Prompt heading
+    fn format_prompt(&self, f: &mut dyn std::fmt::Write, prompt: &str) -> std::fmt::Result {
+        write!(f, "{} {}", "◉".cyan().bold(), prompt)
+    }
+}
+
 fn main() {
     println!("{}", "Spring Initializr CLI!".bright_green().bold());
     println!(
         "{}",
         "https://github.com/AlbertLnz/spring-initializr-cli".bright_yellow()
     );
-    println!("{}", "Created by AlbertLnz".bright_cyan());
+    println!("{}", "Created by AlbertLnz\n".bright_magenta().italic());
 
     // fetching action_()
     let data = match action_() {
@@ -74,68 +83,66 @@ fn main() {
 
     // LANGUAGE
     let (languages, default_language_index) = data.spring_languages;
-    let default_language_position = default_language_index.unwrap_or(0);
 
-    let language_selection = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt("Select the language")
+    let language_selection = Select::with_theme(&CustomTheme)
+        .with_prompt("Select the language".cyan().to_string())
         .items(&languages)
-        .default(default_language_position)
+        .default(default_language_index.unwrap_or(0))
         .interact()
         .expect("Failed to read selection");
 
     let spring_language = languages[language_selection].clone();
-    print!("{}\n", spring_language);
+    println!("{}\n", spring_language);
 
     // PROJECT
-    println!("{}", "Select the project:".bright_green());
     let options = vec!["Gradle", "Maven"];
 
-    let selection = Select::with_theme(&ColorfulTheme::default())
+    let project_selection = Select::with_theme(&CustomTheme)
+        .with_prompt("Select the project:".cyan().to_string())
         .items(&options)
         .default(1)
         .interact()
         .expect("Failed to read selection");
 
-    let project = options[selection];
-    println!("{}", project);
+    let project = options[project_selection];
+    println!("{}\n", project);
 
     // SPRING BOOTVERSION
-    println!("{}", "Select the Spring Boot version:".bright_green());
     let (boot_versions, default_boot_index) = data.spring_boot_versions;
-    let default_boot_position = default_boot_index.unwrap_or(0);
 
-    let boot_selection = Select::with_theme(&ColorfulTheme::default())
+    let boot_selection: usize = Select::with_theme(&CustomTheme)
+        .with_prompt("Select the Spring Boot version:".cyan().to_string())
         .items(&boot_versions)
-        .default(default_boot_position)
+        .default(default_boot_index.unwrap_or(0))
         .interact()
         .expect("Failed to read selection");
 
     let spring_boot_version = boot_versions[boot_selection].clone();
-    println!("{}", spring_boot_version);
+    println!("{}\n", spring_boot_version);
 
     // PROJECT METADATA
-    println!("{}", "Enter the group:".bright_yellow());
+    println!("{}", "Enter the group:".cyan());
     let mut project_group = String::new();
     io::stdin()
         .read_line(&mut project_group)
         .expect("Failed to read input!");
     let project_group: &str = project_group.trim();
 
-    println!("{}", "Enter the name:".bright_yellow());
+    println!("{}", "Enter the name:".cyan());
     let mut project_name = String::new();
     io::stdin()
         .read_line(&mut project_name)
         .expect("Failed to read input!");
     let project_name: &str = project_name.trim();
 
-    println!("{}", "Enter the description:".bright_yellow());
+    println!("{}", "Enter the description:".cyan());
     let mut project_description = String::new();
     io::stdin()
         .read_line(&mut project_description)
         .expect("Failed to read input!");
     let project_description: &str = project_description.trim();
 
-    println!("{}", "Enter the version:".bright_yellow());
+    println!("{}", "Enter the version:".cyan());
     let mut project_version = String::new();
     io::stdin()
         .read_line(&mut project_version)
@@ -143,40 +150,37 @@ fn main() {
     let project_version: &str = project_version.trim();
 
     // PACKAGING
-    println!("{}", "Select the packaging:".bright_green());
     let (spring_packaging, default_spring_packaging_index) = data.spring_packagings;
-    let default_spring_packaging_position = default_spring_packaging_index.unwrap_or(0);
 
-    let packaging_selection = Select::with_theme(&ColorfulTheme::default())
+    let packaging_selection = Select::with_theme(&CustomTheme)
+        .with_prompt("Select the packaging:".cyan().to_string())
         .items(&spring_packaging)
-        .default(default_spring_packaging_position)
+        .default(default_spring_packaging_index.unwrap_or(0))
         .interact()
         .expect("Failed to read selection");
 
     let spring_packaging = spring_packaging[packaging_selection].clone();
-    println!("Selected Packaging: {}\n", spring_packaging);
+    println!("{}\n", spring_packaging);
 
     // JAVA VERSION
-    println!("{}", "Select the Java version:".bright_green());
     let (java_version, default_java_version_index) = data.java_versions;
-    let default_java_version_position = default_java_version_index.unwrap_or(0);
 
-    let packaging_selection = Select::with_theme(&ColorfulTheme::default())
+    let version_selection = Select::with_theme(&CustomTheme)
+        .with_prompt("Select the Java version:".cyan().to_string())
         .items(&java_version)
-        .default(default_java_version_position)
+        .default(default_java_version_index.unwrap_or(0))
         .interact()
         .expect("Failed to read selection");
 
-    let java_version = java_version[packaging_selection].clone();
-    println!("Selected Java version: {}\n", java_version);
+    let java_version = java_version[version_selection].clone();
+    println!("{}\n", java_version);
 
     // DEPENDENCIES
-    println!("{}", "Select the dependencies:".bright_green());
+    let java_dependency_names = data.java_dependencies;
     let mut selected_dependencies = vec![];
 
-    let java_dependency_names = data.java_dependencies;
-
-    let java_dependency_selection = MultiSelect::with_theme(&ColorfulTheme::default())
+    let java_dependency_selection = MultiSelect::with_theme(&CustomTheme)
+        .with_prompt("Select the dependencies:".cyan().to_string())
         .items(&java_dependency_names)
         .interact()
         .expect("Failed to read selection");
