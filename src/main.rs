@@ -1,8 +1,7 @@
-use std::io;
 use std::process::Command;
 
 use colored::*;
-use dialoguer::{theme::Theme, MultiSelect, Select};
+use dialoguer::{theme::Theme, Input, MultiSelect, Select};
 use reqwest;
 use serde::Deserialize;
 use serde_json::Value;
@@ -121,33 +120,37 @@ fn main() {
     println!("{}\n", spring_boot_version);
 
     // PROJECT METADATA
-    println!("{}", "Enter the group:".cyan());
-    let mut project_group = String::new();
-    io::stdin()
-        .read_line(&mut project_group)
-        .expect("Failed to read input!");
+    let project_group: String = Input::with_theme(&CustomTheme)
+        .with_prompt("Enter the group:".cyan().to_string())
+        .default("com.example".italic().to_string())
+        .interact_text()
+        .expect("Failed to read selection");
     let project_group: &str = project_group.trim();
+    println!("{}\n", project_group);
 
-    println!("{}", "Enter the name:".cyan());
-    let mut project_name = String::new();
-    io::stdin()
-        .read_line(&mut project_name)
-        .expect("Failed to read input!");
+    let project_name: String = Input::with_theme(&CustomTheme)
+        .with_prompt("Enter the project name:".cyan().to_string())
+        .default("demo".italic().to_string())
+        .interact_text()
+        .expect("Failed to read selection");
     let project_name: &str = project_name.trim();
+    println!("{}\n", project_name);
 
-    println!("{}", "Enter the description:".cyan());
-    let mut project_description = String::new();
-    io::stdin()
-        .read_line(&mut project_description)
-        .expect("Failed to read input!");
+    let project_description: String = Input::with_theme(&CustomTheme)
+        .with_prompt("Enter the project name:".cyan().to_string())
+        .default("Demo project for Spring Boot".italic().to_string())
+        .interact_text()
+        .expect("Failed to read selection");
     let project_description: &str = project_description.trim();
+    println!("{}\n", project_description);
 
-    println!("{}", "Enter the version:".cyan());
-    let mut project_version = String::new();
-    io::stdin()
-        .read_line(&mut project_version)
-        .expect("Failed to read input!");
+    let project_version: String = Input::with_theme(&CustomTheme)
+        .with_prompt("Enter the project name:".cyan().to_string())
+        .default("1.0".italic().to_string())
+        .interact_text()
+        .expect("Failed to read selection");
     let project_version: &str = project_version.trim();
+    println!("{}\n", project_version);
 
     // PACKAGING
     let (spring_packaging, default_spring_packaging_index) = data.spring_packagings;
