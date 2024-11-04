@@ -40,7 +40,7 @@
 
   3. 
   > [!TIP]
-  > I recommend to create an alias for execute the programm. See the ***'Create an alias'***
+  > I recommend to create an alias for execute the programm. See the ***'Create an alias'*** section.
 
   ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/cut.png)
   
