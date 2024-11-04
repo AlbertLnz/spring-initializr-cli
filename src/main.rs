@@ -57,13 +57,26 @@ struct DependencyValue {
 struct CustomTheme;
 
 impl Theme for CustomTheme {
-    // Prompt heading
     fn format_prompt(&self, f: &mut dyn std::fmt::Write, prompt: &str) -> std::fmt::Result {
         write!(f, "{} {}", "◉".cyan().bold(), prompt)
+    }
+
+    fn format_select_prompt_item(
+        &self,
+        f: &mut dyn std::fmt::Write,
+        text: &str,
+        active: bool,
+    ) -> std::fmt::Result {
+        if active {
+            write!(f, "{} {}", "►".green().bold(), text.green().bold())
+        } else {
+            write!(f, "  {}", text)
+        }
     }
 }
 
 fn main() {
+    // header
     println!("{}", "Spring Initializr CLI!".bright_green().bold());
     println!(
         "{}",
@@ -89,94 +102,80 @@ fn main() {
         .default(default_language_index.unwrap_or(0))
         .interact()
         .expect("Failed to read selection");
-
     let spring_language = languages[language_selection].clone();
-    println!("{}\n", spring_language);
 
     // PROJECT
     let options = vec!["Gradle", "Maven"];
 
     let project_selection = Select::with_theme(&CustomTheme)
-        .with_prompt("Select the project:".cyan().to_string())
+        .with_prompt("Select the project".cyan().to_string())
         .items(&options)
         .default(1)
         .interact()
         .expect("Failed to read selection");
-
     let project = options[project_selection];
-    println!("{}\n", project);
 
     // SPRING BOOTVERSION
     let (boot_versions, default_boot_index) = data.spring_boot_versions;
 
     let boot_selection: usize = Select::with_theme(&CustomTheme)
-        .with_prompt("Select the Spring Boot version:".cyan().to_string())
+        .with_prompt("Select the Spring Boot version".cyan().to_string())
         .items(&boot_versions)
         .default(default_boot_index.unwrap_or(0))
         .interact()
         .expect("Failed to read selection");
-
     let spring_boot_version = boot_versions[boot_selection].clone();
-    println!("{}\n", spring_boot_version);
 
     // PROJECT METADATA
     let project_group: String = Input::with_theme(&CustomTheme)
-        .with_prompt("Enter the group:".cyan().to_string())
+        .with_prompt("Enter the group".cyan().to_string())
         .default("com.example".italic().to_string())
         .interact_text()
         .expect("Failed to read selection");
     let project_group: &str = project_group.trim();
-    println!("{}\n", project_group);
 
     let project_name: String = Input::with_theme(&CustomTheme)
-        .with_prompt("Enter the project name:".cyan().to_string())
+        .with_prompt("Enter the project name".cyan().to_string())
         .default("demo".italic().to_string())
         .interact_text()
         .expect("Failed to read selection");
     let project_name: &str = project_name.trim();
-    println!("{}\n", project_name);
 
     let project_description: String = Input::with_theme(&CustomTheme)
-        .with_prompt("Enter the project name:".cyan().to_string())
+        .with_prompt("Enter the project description".cyan().to_string())
         .default("Demo project for Spring Boot".italic().to_string())
         .interact_text()
         .expect("Failed to read selection");
     let project_description: &str = project_description.trim();
-    println!("{}\n", project_description);
 
     let project_version: String = Input::with_theme(&CustomTheme)
-        .with_prompt("Enter the project name:".cyan().to_string())
+        .with_prompt("Enter the project version".cyan().to_string())
         .default("1.0".italic().to_string())
         .interact_text()
         .expect("Failed to read selection");
     let project_version: &str = project_version.trim();
-    println!("{}\n", project_version);
 
     // PACKAGING
     let (spring_packaging, default_spring_packaging_index) = data.spring_packagings;
 
     let packaging_selection = Select::with_theme(&CustomTheme)
-        .with_prompt("Select the packaging:".cyan().to_string())
+        .with_prompt("Select the packaging".cyan().to_string())
         .items(&spring_packaging)
         .default(default_spring_packaging_index.unwrap_or(0))
         .interact()
         .expect("Failed to read selection");
-
     let spring_packaging = spring_packaging[packaging_selection].clone();
-    println!("{}\n", spring_packaging);
 
     // JAVA VERSION
     let (java_version, default_java_version_index) = data.java_versions;
 
     let version_selection = Select::with_theme(&CustomTheme)
-        .with_prompt("Select the Java version:".cyan().to_string())
+        .with_prompt("Select the Java version".cyan().to_string())
         .items(&java_version)
         .default(default_java_version_index.unwrap_or(0))
         .interact()
         .expect("Failed to read selection");
-
     let java_version = java_version[version_selection].clone();
-    println!("{}\n", java_version);
 
     // DEPENDENCIES
     let java_dependency_names = data.java_dependencies;
@@ -192,8 +191,6 @@ fn main() {
         selected_dependencies.push(java_dependency_names[index].clone());
     }
 
-    println!("Selected dependencies: {:?}\n", selected_dependencies);
-
     let command = generate_spring_init_command(
         spring_language,
         project,
@@ -206,6 +203,8 @@ fn main() {
         java_version,
         &selected_dependencies,
     );
+
+    println!("COMMAND: {}", command);
 
     execute_command(command);
 }
