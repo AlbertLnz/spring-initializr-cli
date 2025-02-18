@@ -2,7 +2,7 @@
 name = "spring-initializr-cli"
 description = "Command-line tool to quickly and easily create new Spring Boot projects"
 repository = "https://github.com/AlbertLnz/spring-initializr-cli"
-version = "0.1.2"
+version = "0.2.1"
 edition = "2021"
 categories = ["command-line-utilities", "development-tools::cargo-plugins"]
 keywords = ["cli", "spring", "framework", "java"]
