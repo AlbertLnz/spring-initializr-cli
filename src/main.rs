@@ -2,7 +2,8 @@ use std::io;
 use std::process::Command;
 
 use colored::*;
-use dialoguer::{theme::Theme, Input, MultiSelect, Select};
+use dialoguer::{theme::Theme, Input, Select};
+use inquire::MultiSelect;
 use reqwest;
 use serde::Deserialize;
 use serde_json::Value;
@@ -188,17 +189,24 @@ fn main() {
 
     // DEPENDENCIES
     let java_dependency_names = data.java_dependencies;
-    let mut selected_dependencies = vec![];
 
-    let java_dependency_selection = MultiSelect::with_theme(&CustomTheme)
-        .with_prompt("Select the dependencies".cyan().to_string())
-        .items(&java_dependency_names)
-        .interact()
+    // · Using 'MultiSelect' from dialoguer
+    // let mut selected_dependencies = vec![];
+    // let java_dependency_selection = MultiSelect::with_theme(&CustomTheme)
+    //     .with_prompt("Select the dependencies".cyan().to_string())
+    //     .items(&java_dependency_names)
+    //     .interact()
+    //     .expect("Failed to read selection");
+
+    // for &index in &java_dependency_selection {
+    //     selected_dependencies.push(java_dependency_names[index].clone());
+    // }
+
+    // · Using 'MultiSelect' from Inquire
+    let prompt = "Select the dependencies".cyan().to_string() + ":";
+    let selected_dependencies = MultiSelect::new(&prompt, java_dependency_names.clone())
+        .prompt()
         .expect("Failed to read selection");
-
-    for &index in &java_dependency_selection {
-        selected_dependencies.push(java_dependency_names[index].clone());
-    }
 
     let command = generate_spring_init_command(
         spring_language,

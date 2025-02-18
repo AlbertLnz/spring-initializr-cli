@@ -9,6 +9,7 @@
 > Dependencies <br>
 >> reqwest,
 >> dialoguer,
+>> inquire,
 >> colored,
 >> serde,
 >> termion
